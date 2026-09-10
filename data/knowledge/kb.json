@@ -1,0 +1,21 @@
+[
+  {
+    "id": "KB-001",
+    "title": "VPN Connection Failed",
+    "content": "If your VPN is not connecting, first ensure you have an active internet connection. Check if the Pulse Secure client is running. If you get error 1205, your token has expired. Reset your MFA token via the IT portal. For access to the finance server, you MUST be on the VPN.",
+    "tags": ["vpn", "network", "finance"]
+  },
+  {
+    "id": "KB-002",
+    "title": "Finance Server Access Requirements",
+    "content": "Access to the finance server (fin-prod-01) requires both active VPN connection and explicit Finance Department authorization in your AD profile. Standard engineering profiles do NOT have access by default.",
+    "tags": ["finance", "access", "permissions"]
+  },
+  {
+    "id": "KB-003",
+    "title": "Password Reset Policy",
+    "content": "Users can reset their own passwords via the self-service portal at https://password.internal. If you are locked out, you must raise a ticket. Agents cannot reset passwords directly; they can only raise a ticket for the security team.",
+    "tags": ["password", "security", "account"]
+  }
+]
+

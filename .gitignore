@@ -1,0 +1,97 @@
+﻿# ===========================
+# Python
+# ===========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+*.pyc
+*.pyo
+*.pyd
+
+# ===========================
+# Virtual Environments
+# ===========================
+myvenv/
+venv/
+.venv/
+env/
+ENV/
+
+# ===========================
+# Environment / Secrets
+# ===========================
+.env
+*.secret
+*.key
+*.pem
+secrets.json
+
+# ===========================
+# Data / Generated Files
+# ===========================
+data/memory/
+data/knowledge/chroma_db/
+*.db
+*.sqlite
+*.sqlite3
+
+# ===========================
+# Logs
+# ===========================
+*.log
+logs/
+log/
+
+# ===========================
+# Testing / Coverage
+# ===========================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+
+# ===========================
+# IDE / Editor
+# ===========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===========================
+# Jupyter
+# ===========================
+.ipynb_checkpoints/
+
+# ===========================
+# Distribution
+# ===========================
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ===========================
+# MyPy
+# ===========================
+.mypy_cache/
+.dmypy.json
+dmypy.json
