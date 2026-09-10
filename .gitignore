@@ -95,3 +95,11 @@ pip-delete-this-directory.txt
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# ===========================
+# Antigravity / Project scaffolding (not for repo)
+# ===========================
+.agents/
+scripts/
+Poc2 Prompt.md
+CHANGES.md
