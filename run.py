@@ -30,6 +30,16 @@ def main():
     print("🚀 STARTING SECURE MULTI-AGENT IT SUPPORT ASSISTANT (ALL-IN-ONE)")
     print("=" * 60)
 
+    # Clear old chat sessions on server restart so it doesn't persist forever
+    import glob
+    chat_files = glob.glob(os.path.join(root_dir, "data", "memory", "chat_*.json"))
+    for f in chat_files:
+        try:
+            os.remove(f)
+        except Exception:
+            pass
+    print("🧹 Cleared previous chat sessions.")
+
     # 1. Start Mock IT Services (Port 8001)
     print("1️⃣ Starting Mock IT Services API on http://127.0.0.1:8001 ...")
     p_mock = subprocess.Popen(
