@@ -45,14 +45,21 @@ def build_conversation_context(state: SupportState) -> str:
             # Format older messages
             chat_text = "\n".join([f"{m.get('role', 'user').capitalize()}: {m.get('content', '')}" for m in older_messages])
             
-            # Fast, cheap summarization call
-            llm = ChatGroq(api_key=settings.groq_api_key, model_name=settings.groq_model, temperature=0.1, max_tokens=150)
-            sys_prompt = "Summarize the key facts, user issues, and agent resolutions from this past conversation in 2 concise sentences. Do not include pleasantries."
+            # Fast, structured summarization call
+            llm = ChatGroq(api_key=settings.groq_api_key, model_name=settings.groq_model, temperature=0.1, max_tokens=250)
+            sys_prompt = (
+                "You are a memory compressor. Summarize the older conversation history into a highly dense, bulleted list. "
+                "Include:\n"
+                "- Core issues raised by the user\n"
+                "- Actions/resolutions taken by the agent\n"
+                "- Important facts, IDs, or constraints mentioned\n"
+                "Output strictly bullet points."
+            )
             
             res = llm.invoke([SystemMessage(content=sys_prompt), HumanMessage(content=chat_text)])
             summary = res.content.strip()
             
-            history_lines.append(f"[LAZY SUMMARY OF OLDER CHAT]: {summary}")
+            history_lines.append(f"--- LAZY SUMMARY OF OLDER CHAT ---\n{summary}\n----------------------------------")
         except Exception as e:
             history_lines.append(f"[LAZY SUMMARY OF OLDER CHAT]: (Summarization failed: {e})")
             
