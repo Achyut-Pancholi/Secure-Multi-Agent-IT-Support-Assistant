@@ -150,3 +150,14 @@ pytest tests/ -v
 - ðŸ–¼ï¸ [LangGraph Workflow Diagram](docs/langgraph_workflow.png)
 
 
+
+## 🧠 Context Management & Memory Strategy
+To avoid token exhaustion and hallucination from oversized context windows, this project uses a **Hybrid Context Strategy**:
+- **Sliding Window (Short-Term)**: Retains the exact last 4 raw messages for immediate follow-up resolution (like "Why?" or "Try again").
+- **Lazy Summarization**: If the history exceeds the buffer size, older messages are summarized or marked out to keep the LLM focused.
+- **Code-Based State Extraction (Long-Term)**: Zero-cost state extraction directly into SQLite. When the agent triggers tools like create_ticket, the output is saved to the SQLite long-term memory without extra LLM overhead.
+
+## 📊 AI Evaluation (Evals)
+Testing probabilistic outputs requires proper AI Evaluation techniques:
+- **Deterministic Evals (Pytest)**: Unit tests for Input Guardrails (prompt injection), Routing correctness, and output regex formatting.
+- **LLM-as-a-Judge (Langfuse)**: A custom evaluation script (evals/evaluate.py) that scores agent outputs on **Faithfulness** and **Relevance** using a fast, deterministic LLM call. Scores are cached and surfaced directly in the Streamlit UI.

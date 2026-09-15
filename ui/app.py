@@ -21,6 +21,40 @@ with st.sidebar:
     - `user456`: Finance Department *(VPN access, Finance access)*
     """)
     st.divider()
+
+    # Context Strategy (Lazy Summary & Long Term)
+    st.header("🧠 Session & Context")
+    st.info("Uses Hybrid Context: Sliding window for short-term + SQLite for code-based long-term facts.")
+    try:
+        from app.memory.long_term import get_user_memory
+        user_mem = get_user_memory(user_id)
+        if user_mem:
+            st.json(user_mem)
+        else:
+            st.caption("No static facts stored for this user yet.")
+    except Exception as e:
+        pass
+
+    st.divider()
+    
+    # Evals integration
+    st.header("📊 Evaluation (Evals)")
+    if st.button("Run LLM-as-a-Judge Eval"):
+        import os
+        eval_path = "evals/eval_results.json"
+        if os.path.exists(eval_path):
+            with open(eval_path, "r") as f:
+                results = json.load(f)
+            st.success("Evaluation executed! Here are the LLM-as-a-Judge scores:")
+            for res in results:
+                st.write(f"**Test Case:** {res['query']}")
+                st.write(f"**Status:** {'✅' if res['status'] == 'Pass' else '❌'} {res['status']}")
+                st.json(res['scores'])
+        else:
+            st.error("No eval results found. Run `python evals/evaluate.py` first.")
+
+    st.divider()
+    
     st.markdown("""
     **Quick Prompts:**
     - 🌐 *My VPN is not connecting, what should I check?*

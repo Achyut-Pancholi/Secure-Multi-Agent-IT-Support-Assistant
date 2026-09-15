@@ -1,0 +1,20 @@
+
+======================================================================
+27. BONUS: CONTEXT MANAGEMENT & AI EVALS (Industry Scale Solutions)
+======================================================================
+
+THE CONTEXT PROBLEM:
+Relying purely on the "last 4 messages" (Sliding Window) limits the agent's memory. Relying strictly on Vectorizing chat history fails on ambiguous pronouns (e.g., "Why did that happen?"). Passing all messages blows up the token limit and exhausts free-tier RPM.
+
+THE HYBRID CONTEXT SOLUTION:
+1. Short-Term Buffer: Last 4 raw messages are kept for immediate conversational flow.
+2. Lazy Summarization: If history grows too large, older turns are deferred or summarized using a fast local model, keeping token count strictly bounded.
+3. Code-Based State Extraction (Zero LLM Cost): When the action agent executes a tool (e.g., create_support_ticket), the Python code directly extracts the "ticket_id" and saves it to the SQLite long-term memory. This requires NO extra LLM calls and is 100% accurate.
+
+THE AI EVALUATION (EVALS) STRATEGY:
+How do you test an AI that gives different text every time? You use "Evals".
+1. Deterministic Evals: Pytest rules testing if our Guardrails block attacks and if the router chooses the right Agent Enum.
+2. LLM-as-a-Judge: A lightweight script (evals/evaluate.py) runs golden scenarios and asks Groq to score the agent's response out of 5 for "Faithfulness" (Is it hallucinating?) and "Answer Relevance". 
+
+WHY NOT FULL RAGAS ON EVERY REQUEST?
+Frameworks like RAGAS consume 4-6 LLM calls per test case. Running it online on user requests would exhaust LLM APIs instantly. Therefore, Evals are strictly run OFFLINE (or via UI button triggers) to log performance without impacting runtime speed or rate limits.

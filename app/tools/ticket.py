@@ -15,6 +15,11 @@ def create_support_ticket(user_id: str, description: str, category: str, priorit
     logger.info(f"Executing create_support_ticket for user: {user_id}")
     try:
         data = client.create_ticket(user_id, description, category, priority)
+        # --- CODE BASED STATE EXTRACTION (0 LLM Cost) ---
+        from app.memory.long_term import update_user_memory
+        if "ticket_id" in data:
+            update_user_memory(user_id, {"last_ticket_created": data["ticket_id"]})
+        # ------------------------------------------------
         return json.dumps(data, indent=2)
     except InternalAPIError as e:
         return f"Error creating ticket: {str(e)}"
