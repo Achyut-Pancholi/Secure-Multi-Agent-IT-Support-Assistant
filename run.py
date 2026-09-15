@@ -42,7 +42,7 @@ def main():
     # 2. Start Main FastAPI Backend (Port 8000)
     print("2️⃣ Starting Main Multi-Agent Backend on http://127.0.0.1:8000 ...")
     p_api = subprocess.Popen(
-        [sys.executable, "app/main.py"],
+        [sys.executable, "-m", "uvicorn", "app.main:app", "--port", "8000", "--reload"],
         cwd=root_dir
     )
     processes.append(p_api)
