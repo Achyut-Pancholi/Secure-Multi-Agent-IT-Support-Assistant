@@ -39,7 +39,9 @@ with st.sidebar:
     
     # Evals integration
     st.header("📊 Evaluation (Evals)")
-    if st.button("Run LLM-as-a-Judge Eval"):
+
+    @st.dialog("LLM-as-a-Judge Evaluation Results")
+    def show_eval_popup():
         import os
         eval_path = "evals/eval_results.json"
         if os.path.exists(eval_path):
@@ -50,8 +52,12 @@ with st.sidebar:
                 st.write(f"**Test Case:** {res['query']}")
                 st.write(f"**Status:** {'✅' if res['status'] == 'Pass' else '❌'} {res['status']}")
                 st.json(res['scores'])
+                st.divider()
         else:
             st.error("No eval results found. Run `python evals/evaluate.py` first.")
+
+    if st.button("Run LLM-as-a-Judge Eval"):
+        show_eval_popup()
 
     st.divider()
     
