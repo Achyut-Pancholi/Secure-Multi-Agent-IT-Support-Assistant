@@ -34,15 +34,28 @@ def build_conversation_context(state: SupportState) -> str:
         
     history_lines = []
     
-    # 2. Lazy Summarization logic
+    # 2. Lazy Summarization logic (Rolling Context)
     if len(history) > 4:
-        # For POC: Summarizing the older messages lightly to avoid token exhaustion
         older_messages = history[:-4]
-        # In a real heavy app, this would be an LLM call. Here we aggregate key topics as a structural summary.
-        # Alternatively, you can run a background LLM call. 
-        # But to be fast & free, we pass a structural placeholder or call Groq explicitly.
-        history_lines.append("[SYSTEM NOTE: There are older chat messages not shown here. Rely on User Facts.]")
-    
+        try:
+            from langchain_groq import ChatGroq
+            from langchain_core.messages import HumanMessage, SystemMessage
+            from app.config import settings
+            
+            # Format older messages
+            chat_text = "\n".join([f"{m.get('role', 'user').capitalize()}: {m.get('content', '')}" for m in older_messages])
+            
+            # Fast, cheap summarization call
+            llm = ChatGroq(api_key=settings.groq_api_key, model_name=settings.groq_model, temperature=0.1, max_tokens=150)
+            sys_prompt = "Summarize the key facts, user issues, and agent resolutions from this past conversation in 2 concise sentences. Do not include pleasantries."
+            
+            res = llm.invoke([SystemMessage(content=sys_prompt), HumanMessage(content=chat_text)])
+            summary = res.content.strip()
+            
+            history_lines.append(f"[LAZY SUMMARY OF OLDER CHAT]: {summary}")
+        except Exception as e:
+            history_lines.append(f"[LAZY SUMMARY OF OLDER CHAT]: (Summarization failed: {e})")
+            
     # Take the last 4 messages for relevant context
     for msg in history[-4:]:
         role = msg.get("role", "user").capitalize()
