@@ -26,6 +26,8 @@ with st.sidebar:
     st.header("🧠 Session & Context")
     st.info("Uses Hybrid Context: Sliding window for short-term + SQLite for code-based long-term facts.")
     try:
+        import sys, os
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from app.memory.long_term import get_user_memory
         user_mem = get_user_memory(user_id)
         if user_mem:
@@ -33,7 +35,7 @@ with st.sidebar:
         else:
             st.caption("No static facts stored for this user yet.")
     except Exception as e:
-        pass
+        st.error(f"Error loading memory: {e}")
 
     st.divider()
     
