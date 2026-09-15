@@ -26,25 +26,17 @@ with st.sidebar:
     st.header("🧠 Session & Context")
     st.info("Uses Hybrid Context: Sliding window for short-term + SQLite for code-based long-term facts.")
     try:
-        import sys, os
-        # The file is named app.py, and the backend is named app/. This causes an import collision!
-        # Python tries to import this very file again, which executes st.text_input twice.
-        # We fix this by ensuring the POC2 root is the VERY FIRST item in sys.path.
-        poc2_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        if poc2_root not in sys.path:
-            sys.path.insert(1, poc2_root)
-            
-        # Temporarily remove the ui directory from sys.path to avoid self-importing
-        ui_dir = os.path.dirname(os.path.abspath(__file__))
-        original_path = list(sys.path)
-        sys.path = [p for p in sys.path if p not in (ui_dir, '')] + [poc2_root]
+        import sqlite3, os, json
+        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "memory", "long_term.db")
+        user_mem = None
+        if os.path.exists(db_path):
+            with sqlite3.connect(db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT attributes FROM user_memory WHERE user_id = ?", (user_id,))
+                row = cursor.fetchone()
+                if row and row[0]:
+                    user_mem = json.loads(row[0])
         
-        from app.memory.long_term import get_user_memory
-        
-        # Restore original path
-        sys.path = original_path
-        
-        user_mem = get_user_memory(user_id)
         if user_mem:
             st.json(user_mem)
         else:
