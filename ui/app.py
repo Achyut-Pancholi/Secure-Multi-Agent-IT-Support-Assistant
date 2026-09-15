@@ -14,7 +14,7 @@ st.markdown("Multi-agent orchestration powered by **LangGraph**, **Groq OpenAI O
 # Sidebar for config/user state
 with st.sidebar:
     st.header("👤 User Context")
-    user_id = st.text_input("User ID", value="user123")
+    user_id = st.text_input("User ID", value="user123", key="user_id_input")
     st.markdown("""
     **Demo Users:**
     - `user123`: Engineering Department *(VPN access, no Finance access)*
