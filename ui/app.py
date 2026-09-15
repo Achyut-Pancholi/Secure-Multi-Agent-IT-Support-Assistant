@@ -14,7 +14,7 @@ st.markdown("Multi-agent orchestration powered by **LangGraph**, **Groq OpenAI O
 # Sidebar for config/user state
 with st.sidebar:
     st.header("👤 User Context")
-    user_id = st.text_input("User ID", value="user123", key="user_id_input")
+    user_id = st.text_input("Enter User ID:", value="user123", key="unique_sidebar_user_id")
     st.markdown("""
     **Demo Users:**
     - `user123`: Engineering Department *(VPN access, no Finance access)*
@@ -27,8 +27,23 @@ with st.sidebar:
     st.info("Uses Hybrid Context: Sliding window for short-term + SQLite for code-based long-term facts.")
     try:
         import sys, os
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        # The file is named app.py, and the backend is named app/. This causes an import collision!
+        # Python tries to import this very file again, which executes st.text_input twice.
+        # We fix this by ensuring the POC2 root is the VERY FIRST item in sys.path.
+        poc2_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if poc2_root not in sys.path:
+            sys.path.insert(1, poc2_root)
+            
+        # Temporarily remove the ui directory from sys.path to avoid self-importing
+        ui_dir = os.path.dirname(os.path.abspath(__file__))
+        original_path = list(sys.path)
+        sys.path = [p for p in sys.path if p not in (ui_dir, '')] + [poc2_root]
+        
         from app.memory.long_term import get_user_memory
+        
+        # Restore original path
+        sys.path = original_path
+        
         user_mem = get_user_memory(user_id)
         if user_mem:
             st.json(user_mem)
