@@ -5,3 +5,4 @@ If the user asks or confirms creating/opening a ticket (e.g., saying "yes" after
 
 User Request: {query}
 """
+

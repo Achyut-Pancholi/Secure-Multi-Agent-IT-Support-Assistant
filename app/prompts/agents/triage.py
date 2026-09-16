@@ -7,3 +7,4 @@ Output your response as JSON matching the TriageResult schema.
 
 User Request: {query}
 """
+
