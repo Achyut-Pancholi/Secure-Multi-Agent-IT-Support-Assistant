@@ -1,4 +1,4 @@
-﻿# Secure Multi-Agent IT Support Assistant
+# Secure Multi-Agent IT Support Assistant
 
 An intelligent IT Helpdesk assistant built as a **secure multi-agent system** using LangGraph.
 It answers questions from an internal knowledge base, checks user access & service status,
@@ -151,13 +151,18 @@ pytest tests/ -v
 
 
 
-## 🧠 Context Management & Memory Strategy
-To avoid token exhaustion and hallucination from oversized context windows, this project uses a **Hybrid Context Strategy**:
-- **Sliding Window (Short-Term)**: Retains the exact last 4 raw messages for immediate follow-up resolution (like "Why?" or "Try again").
-- **Lazy Summarization**: If the history exceeds the buffer size, older messages are summarized or marked out to keep the LLM focused.
-- **Code-Based State Extraction (Long-Term)**: Zero-cost state extraction directly into SQLite. When the agent triggers tools like create_ticket, the output is saved to the SQLite long-term memory without extra LLM overhead.
+## 🧠 3-Tier Hybrid Memory Strategy
+To avoid token exhaustion and hallucination, this project uses a highly optimized 3-tier memory approach:
+- **Short-Term Sliding Window**: Retains the last 4 raw messages to handle immediate follow-ups.
+- **Rolling Lazy Summary**: Once chat history exceeds 4 turns, older messages are intercepted and compressed into a dense bulleted summary via a background `ChatGroq` LLM call.
+- **Structured Long-Term Memory (SQLite)**: Permanent user data is dynamically appended to arrays (`known_issues`, `ticket_history`) directly in SQLite upon tool execution, bypassing LLM overhead entirely.
+- **Session Auto-Sync**: Streamlit `st.rerun()` instantly syncs UI context panes with the SQLite backend. Chat sessions are persisted in `data/memory/` across browser refreshes, but auto-cleared on server restart for a fresh demo baseline.
 
-## 📊 AI Evaluation (Evals)
-Testing probabilistic outputs requires proper AI Evaluation techniques:
-- **Deterministic Evals (Pytest)**: Unit tests for Input Guardrails (prompt injection), Routing correctness, and output regex formatting.
-- **LLM-as-a-Judge (Langfuse)**: A custom evaluation script (evals/evaluate.py) that scores agent outputs on **Faithfulness** and **Relevance** using a fast, deterministic LLM call. Scores are cached and surfaced directly in the Streamlit UI.
+## 📊 2-Tier AI Evaluations
+Testing non-deterministic outputs uses a dual-dataset strategy via our `evals/evaluate.py` script:
+- **Smoke Dataset (`smoke.json`)**: Fast, critical path evaluations ensuring core functions (routing, RAG, safety) remain intact.
+- **Golden Dataset (`golden.json`)**: Extensive edge cases and deep behavioral assessments.
+- **Interactive UI Evals**: Run your chosen dataset straight from the Streamlit sidebar (`@st.dialog`). Evals run isolated in a background subprocess and instantly cache results to disk, ensuring zero repetitive LLM overhead on subsequent UI views.
+
+## 📝 Modular Prompts
+Prompts are decoupled from workflow code into standalone files (`app/prompts/agents/*.py`). The system is architected to sync dynamically with Langfuse for remote prompt management, safely falling back to these local files when offline.

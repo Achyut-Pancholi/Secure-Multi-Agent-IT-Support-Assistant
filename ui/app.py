@@ -59,9 +59,9 @@ with st.sidebar:
         if not os.path.exists(eval_path):
             with st.spinner("⏳ Running LLM-as-a-Judge on Smoke Dataset for the first time..."):
                 try:
-                    subprocess.run([sys.executable, "evals/evaluate.py", "smoke"], cwd=root_dir, check=True)
-                except Exception as e:
-                    st.error(f"Failed to execute evaluation: {e}")
+                    result = subprocess.run([sys.executable, "-m", "evals.evaluate", "smoke"], cwd=root_dir, check=True, capture_output=True, text=True)
+                except subprocess.CalledProcessError as e:
+                    st.error(f"Failed to execute evaluation:\n{e.stderr}")
                     return
 
         # 2. Subsequent times: Instant load from saved cache
@@ -79,13 +79,19 @@ with st.sidebar:
             with col1:
                 if st.button("🔄 Force Re-run Smoke Eval", key="rerun_eval_btn"):
                     with st.spinner("Re-evaluating Smoke Dataset..."):
-                        subprocess.run([sys.executable, "evals/evaluate.py", "smoke"], cwd=root_dir, check=True)
-                        st.rerun()
+                        try:
+                            subprocess.run([sys.executable, "-m", "evals.evaluate", "smoke"], cwd=root_dir, check=True, capture_output=True, text=True)
+                            st.rerun()
+                        except subprocess.CalledProcessError as e:
+                            st.error(f"Eval Failed:\n{e.stderr}")
             with col2:
                 if st.button("🏆 Run Golden Benchmark", key="run_golden_eval_btn"):
                     with st.spinner("Running Golden Benchmark Eval..."):
-                        subprocess.run([sys.executable, "evals/evaluate.py", "golden"], cwd=root_dir, check=True)
-                        st.rerun()
+                        try:
+                            subprocess.run([sys.executable, "-m", "evals.evaluate", "golden"], cwd=root_dir, check=True, capture_output=True, text=True)
+                            st.rerun()
+                        except subprocess.CalledProcessError as e:
+                            st.error(f"Eval Failed:\n{e.stderr}")
         else:
             st.error("No eval results found.")
 
