@@ -51,19 +51,43 @@ with st.sidebar:
 
     @st.dialog("LLM-as-a-Judge Evaluation Results")
     def show_eval_popup():
-        import os
-        eval_path = "evals/eval_results.json"
+        import os, subprocess, sys
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        eval_path = os.path.join(root_dir, "evals", "eval_results.json")
+        
+        # 1. First time: Run evaluation if not already generated
+        if not os.path.exists(eval_path):
+            with st.spinner("⏳ Running LLM-as-a-Judge on Smoke Dataset for the first time..."):
+                try:
+                    subprocess.run([sys.executable, "evals/evaluate.py", "smoke"], cwd=root_dir, check=True)
+                except Exception as e:
+                    st.error(f"Failed to execute evaluation: {e}")
+                    return
+
+        # 2. Subsequent times: Instant load from saved cache
         if os.path.exists(eval_path):
             with open(eval_path, "r") as f:
                 results = json.load(f)
-            st.success("Evaluation executed! Here are the LLM-as-a-Judge scores:")
+            st.success("✅ Showing LLM-as-a-Judge Evaluation Results:")
             for res in results:
                 st.write(f"**Test Case:** {res['query']}")
                 st.write(f"**Status:** {'✅' if res['status'] == 'Pass' else '❌'} {res['status']}")
                 st.json(res['scores'])
                 st.divider()
+                
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                if st.button("🔄 Force Re-run Smoke Eval", key="rerun_eval_btn"):
+                    with st.spinner("Re-evaluating Smoke Dataset..."):
+                        subprocess.run([sys.executable, "evals/evaluate.py", "smoke"], cwd=root_dir, check=True)
+                        st.rerun()
+            with col2:
+                if st.button("🏆 Run Golden Benchmark", key="run_golden_eval_btn"):
+                    with st.spinner("Running Golden Benchmark Eval..."):
+                        subprocess.run([sys.executable, "evals/evaluate.py", "golden"], cwd=root_dir, check=True)
+                        st.rerun()
         else:
-            st.error("No eval results found. Run `python evals/evaluate.py` first.")
+            st.error("No eval results found.")
 
     if st.button("Run LLM-as-a-Judge Eval"):
         show_eval_popup()
