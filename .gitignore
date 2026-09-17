@@ -1,4 +1,4 @@
-﻿# ===========================
+# ===========================
 # Python
 # ===========================
 __pycache__/
@@ -42,6 +42,7 @@ secrets.json
 # ===========================
 # Data / Generated Files
 # ===========================
+Mentor_Deep_Dive_Guide.txt
 data/memory/
 data/knowledge/chroma_db/
 *.db
