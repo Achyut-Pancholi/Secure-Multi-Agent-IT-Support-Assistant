@@ -24,26 +24,41 @@ def init_chroma():
     if not embeddings:
         return
     
-    if os.path.exists(CHROMA_DB_PATH) and os.listdir(CHROMA_DB_PATH):
-        logger.info("Loading existing Chroma DB.")
-        vector_store = Chroma(persist_directory=CHROMA_DB_PATH, embedding_function=embeddings)
-    else:
-        logger.info("Initializing new Chroma DB from kb.json.")
-        if not os.path.exists(KB_JSON_PATH):
-            logger.warning("kb.json not found. Chroma DB will be empty.")
-            return
-        with open(KB_JSON_PATH, "r") as f:
-            kb_data = json.load(f)
+    if not os.path.exists(KB_JSON_PATH):
+        logger.warning("kb.json not found. Chroma DB will be empty.")
+        return
         
-        texts = [f"{item['title']}\n{item['content']}" for item in kb_data]
-        metadatas = [{"id": item["id"], "tags": ",".join(item["tags"])} for item in kb_data]
-        
-        vector_store = Chroma.from_texts(
-            texts=texts,
-            metadatas=metadatas,
-            embedding=embeddings,
-            persist_directory=CHROMA_DB_PATH
-        )
+    with open(KB_JSON_PATH, "r") as f:
+        kb_data = json.load(f)
+    
+    texts = [f"{item['title']}\n{item['content']}" for item in kb_data]
+    metadatas = [{"id": item["id"], "tags": ",".join(item["tags"])} for item in kb_data]
+    ids = [item["id"] for item in kb_data]
+    
+    vector_store = Chroma(
+        persist_directory=CHROMA_DB_PATH,
+        embedding_function=embeddings
+    )
+    
+    # Check for missing articles from kb.json and sync them
+    existing_ids = set()
+    try:
+        existing_data = vector_store.get()
+        if existing_data and "ids" in existing_data:
+            existing_ids = set(existing_data["ids"])
+    except Exception as e:
+        logger.warning(f"Could not retrieve existing Chroma IDs: {e}")
+
+    new_texts, new_metadatas, new_ids = [], [], []
+    for t, m, i in zip(texts, metadatas, ids):
+        if i not in existing_ids:
+            new_texts.append(t)
+            new_metadatas.append(m)
+            new_ids.append(i)
+
+    if new_texts:
+        logger.info(f"Syncing {len(new_texts)} new articles from kb.json into Chroma DB.")
+        vector_store.add_texts(texts=new_texts, metadatas=new_metadatas, ids=new_ids)
 
 init_chroma()
 

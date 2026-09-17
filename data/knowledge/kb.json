@@ -2,11 +2,12 @@
   {
     "id": "KB-001",
     "title": "VPN Connection Failed",
-    "content": "If your VPN is not connecting, first ensure you have an active internet connection. Check if the Pulse Secure client is running. If you get error 1205, your token has expired. Reset your MFA token via the IT portal. For access to the finance server, you MUST be on the VPN.",
+    "content": "If your VPN is not connecting, first ensure you have an active internet connection. Check if the Cisco AnyConnect or Pulse Secure client is running. If you get error 1205, your token has expired. Reset your MFA token via the IT portal. For access to the finance server, you MUST be connected to the VPN.",
     "tags": [
       "vpn",
       "network",
-      "finance"
+      "finance",
+      "cisco"
     ]
   },
   {
@@ -27,6 +28,62 @@
       "password",
       "security",
       "account"
+    ]
+  },
+  {
+    "id": "KB-004",
+    "title": "Outlook Email & Account Reset Procedure",
+    "content": "To reset your Outlook or Office 365 email password, visit the self-service portal at https://password.internal. Click 'Forgot Password' and complete authentication using your registered Microsoft Authenticator app or SMS code. Once reset, restart Outlook.",
+    "tags": [
+      "outlook",
+      "email",
+      "password",
+      "office365"
+    ]
+  },
+  {
+    "id": "KB-005",
+    "title": "Connecting to Corporate Guest Wi-Fi",
+    "content": "To connect to the corporate guest Wi-Fi, select 'Corp-Guest' from your device's network list. A captive portal page will open automatically. Enter your email address and your internal sponsor's email address to receive a 24-hour guest access token.",
+    "tags": [
+      "wifi",
+      "guest",
+      "network",
+      "internet"
+    ]
+  },
+  {
+    "id": "KB-006",
+    "title": "Software License & Access Requests (Jira, Slack, Figma)",
+    "content": "Requests for software licenses such as Jira, Slack Enterprise, Figma, or GitHub Copilot must be submitted via the IT Portal. Standard approvals take 24-48 hours and require manager sign-off.",
+    "tags": [
+      "software",
+      "license",
+      "jira",
+      "slack",
+      "figma"
+    ]
+  },
+  {
+    "id": "KB-007",
+    "title": "Hardware Replacement & Equipment Policy",
+    "content": "If your monitor, laptop, keyboard, or headset is damaged or malfunctioning, raise a hardware support ticket via the IT helpdesk. Hardware replacements require approval from your department head for expedited delivery.",
+    "tags": [
+      "hardware",
+      "laptop",
+      "monitor",
+      "equipment"
+    ]
+  },
+  {
+    "id": "KB-008",
+    "title": "Multi-Factor Authentication (MFA) Setup & Reset",
+    "content": "If you changed your mobile phone or lost access to Microsoft Authenticator, navigate to https://mfa.internal/reset or open a high-priority IT ticket for an MFA bypass code.",
+    "tags": [
+      "mfa",
+      "authenticator",
+      "security",
+      "2fa"
     ]
   }
 ]
