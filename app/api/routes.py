@@ -86,7 +86,14 @@ async def stream_support_request(
                     node_name = list(step_event.keys())[0]
                     node_data = step_event[node_name]
                     
-                    yield f"data: {json.dumps({'event': f'{node_name}_completed'})}\n\n"
+                    if node_name == "triage_agent":
+                        route_val = node_data.get("route")
+                        route_str = route_val.value if hasattr(route_val, 'value') else str(route_val or "DIRECT_RESPONSE")
+                        yield f"data: {json.dumps({'event': 'triage_agent_completed', 'route': route_str})}\n\n"
+                    elif node_name == "input_guardrail" and node_data.get("errors"):
+                        yield f"data: {json.dumps({'event': 'input_guardrail_failed', 'errors': node_data.get('errors')})}\n\n"
+                    else:
+                        yield f"data: {json.dumps({'event': f'{node_name}_completed'})}\n\n"
                     
                     if node_name == "output_guardrail":
                         final_resp = node_data.get("final_response", "")

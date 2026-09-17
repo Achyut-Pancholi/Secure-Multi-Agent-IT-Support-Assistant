@@ -239,25 +239,30 @@ if prompt := st.chat_input("Describe your IT issue..."):
                             msg = "📥 Request received and authenticated."
                             status_box.write(msg)
                             trace_steps.append(msg)
+                        elif event == "input_guardrail_failed":
+                            msg = "🚫 Input Guardrail: Suspicious input blocked."
+                            status_box.write(msg)
+                            trace_steps.append(msg)
+                            guardrails_status = "Blocked (INP-SEC-01)"
+                            assigned_route = "BLOCKED"
                         elif event == "input_guardrail_completed":
                             msg = "🛡️ Input Guardrail: Sanitized & injection check passed."
                             status_box.write(msg)
                             trace_steps.append(msg)
                         elif event == "triage_agent_completed":
-                            msg = "🧠 Triage Agent: Query classified & route assigned."
+                            route_val = event_data.get("route", "DIRECT_RESPONSE")
+                            assigned_route = route_val
+                            msg = f"🧠 Triage Agent: Query classified → Route: {route_val}"
                             status_box.write(msg)
                             trace_steps.append(msg)
-                            assigned_route = event_data.get("route", "KNOWLEDGE/ACTION")
                         elif event == "knowledge_agent_completed":
                             msg = "📚 Knowledge Agent: Chroma Vector DB queried."
                             status_box.write(msg)
                             trace_steps.append(msg)
-                            assigned_route = "KNOWLEDGE"
                         elif event == "action_agent_completed":
                             msg = "⚡ Action Agent: Tool policy checked & internal API queried."
                             status_box.write(msg)
                             trace_steps.append(msg)
-                            assigned_route = "ACTION"
                         elif event == "response_agent_completed":
                             msg = "✍️ Response Agent: Context synthesized."
                             status_box.write(msg)
