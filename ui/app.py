@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import json
+import time
 
 # Configuration
 API_URL = "http://127.0.0.1:8000/api/v1"
@@ -131,6 +132,18 @@ with st.sidebar:
 
     st.divider()
     
+    st.header("⚡ Live Observability")
+    if "last_metrics" in st.session_state:
+        lm = st.session_state.last_metrics
+        c1, c2 = st.columns(2)
+        c1.metric("Latency", f"{lm.get('latency', 0):.2f}s")
+        c2.metric("Route", lm.get('route', 'N/A'))
+        st.caption(f"🛡️ Guardrails: `{lm.get('guardrails', 'Passed')}`")
+    else:
+        st.info("Run a query to see live execution latency & agent trace metrics.")
+
+    st.divider()
+    
     st.markdown("""
     **Quick Prompts:**
     - 🌐 *My VPN is not connecting, what should I check?*
@@ -162,6 +175,17 @@ if "messages" not in st.session_state or getattr(st.session_state, "current_user
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
+        if message["role"] == "assistant" and "metrics" in message:
+            with st.expander("⚡ Observability & Trace Metrics"):
+                m = message["metrics"]
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Latency", f"{m.get('latency', 0):.2f}s")
+                col2.metric("Route", m.get("route", "N/A"))
+                col3.metric("Guardrails", m.get("guardrails", "Passed"))
+                if "trace" in m and m["trace"]:
+                    st.caption("Execution Trace Timeline:")
+                    for step in m["trace"]:
+                        st.markdown(f"- {step}")
 
 # Process new user input
 if prompt := st.chat_input("Describe your IT issue..."):
@@ -180,7 +204,6 @@ if prompt := st.chat_input("Describe your IT issue..."):
             "Authorization": f"Bearer {API_TOKEN}",
             "Content-Type": "application/json"
         }
-        # Send previous messages as conversation history for multi-turn context
         history_to_send = st.session_state.messages[:-1]
         payload = {
             "user_id": user_id,
@@ -189,6 +212,11 @@ if prompt := st.chat_input("Describe your IT issue..."):
         }
         
         final_answer = ""
+        start_time = time.time()
+        trace_steps = []
+        assigned_route = "UNKNOWN"
+        guardrails_status = "Passed"
+
         try:
             # Connect to streaming endpoint
             response = requests.post(
@@ -208,25 +236,43 @@ if prompt := st.chat_input("Describe your IT issue..."):
                         event = event_data.get("event", "")
                         
                         if event == "request_received":
-                            status_box.write("📥 Request received and authenticated.")
+                            msg = "📥 Request received and authenticated."
+                            status_box.write(msg)
+                            trace_steps.append(msg)
                         elif event == "input_guardrail_completed":
-                            status_box.write("🛡️ Input Guardrail: Sanitized & injection check passed.")
+                            msg = "🛡️ Input Guardrail: Sanitized & injection check passed."
+                            status_box.write(msg)
+                            trace_steps.append(msg)
                         elif event == "triage_agent_completed":
-                            status_box.write("🧠 Triage Agent: Query classified & route assigned.")
+                            msg = "🧠 Triage Agent: Query classified & route assigned."
+                            status_box.write(msg)
+                            trace_steps.append(msg)
+                            assigned_route = event_data.get("route", "KNOWLEDGE/ACTION")
                         elif event == "knowledge_agent_completed":
-                            status_box.write("📚 Knowledge Agent: Chroma Vector DB queried.")
+                            msg = "📚 Knowledge Agent: Chroma Vector DB queried."
+                            status_box.write(msg)
+                            trace_steps.append(msg)
+                            assigned_route = "KNOWLEDGE"
                         elif event == "action_agent_completed":
-                            status_box.write("⚡ Action Agent: Tool policy checked & internal API queried.")
+                            msg = "⚡ Action Agent: Tool policy checked & internal API queried."
+                            status_box.write(msg)
+                            trace_steps.append(msg)
+                            assigned_route = "ACTION"
                         elif event == "response_agent_completed":
-                            status_box.write("✍️ Response Agent: Context synthesized.")
+                            msg = "✍️ Response Agent: Context synthesized."
+                            status_box.write(msg)
+                            trace_steps.append(msg)
                         elif event == "output_guardrail_completed":
-                            status_box.write("🔒 Output Guardrail: PII and IP verification passed.")
+                            msg = "🔒 Output Guardrail: PII and IP verification passed."
+                            status_box.write(msg)
+                            trace_steps.append(msg)
                         elif event == "completed":
                             final_answer = event_data.get("response", "")
                             status_box.update(label="Complete!", state="complete", expanded=False)
                             message_placeholder.markdown(final_answer)
                         elif event == "error":
                             final_answer = f"⚠️ Error: {event_data.get('message')}"
+                            guardrails_status = "Blocked / Policy Violation"
                             status_box.update(label="Failed", state="error", expanded=True)
                             message_placeholder.markdown(final_answer)
                     except json.JSONDecodeError:
@@ -241,14 +287,27 @@ if prompt := st.chat_input("Describe your IT issue..."):
                 status_box.update(label="Complete!", state="complete", expanded=False)
                 message_placeholder.markdown(final_answer)
 
-            st.session_state.messages.append({"role": "assistant", "content": final_answer})
+            elapsed_time = round(time.time() - start_time, 2)
+            metrics = {
+                "latency": elapsed_time,
+                "route": assigned_route,
+                "guardrails": guardrails_status,
+                "trace": trace_steps
+            }
+
+            st.session_state.last_metrics = metrics
+            st.session_state.messages.append({
+                "role": "assistant", 
+                "content": final_answer,
+                "metrics": metrics
+            })
             save_chat(st.session_state.messages)
             st.rerun()
                 
         except requests.exceptions.RequestException as e:
-            error_msg = f"❌ **API Request Failed**: {str(e)}\n\n*(Make sure `python app/main.py` is running on port 8000)*"
-            status_box.update(label="Connection Error", state="error", expanded=True)
-            message_placeholder.markdown(error_msg)
+            error_msg = f"API Error: {str(e)}"
+            status_box.update(label="Connection Failed", state="error", expanded=True)
+            message_placeholder.error(error_msg)
             st.session_state.messages.append({"role": "assistant", "content": error_msg})
             save_chat(st.session_state.messages)
             st.rerun()
