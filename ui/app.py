@@ -135,10 +135,9 @@ with st.sidebar:
     st.header("⚡ Live Observability")
     if "last_metrics" in st.session_state:
         lm = st.session_state.last_metrics
-        c1, c2 = st.columns(2)
-        c1.metric("Latency", f"{lm.get('latency', 0):.2f}s")
-        c2.metric("Route", lm.get('route', 'N/A'))
-        st.caption(f"🛡️ Guardrails: `{lm.get('guardrails', 'Passed')}`")
+        st.write(f"⏱️ **Latency:** `{lm.get('latency', 0):.2f}s`")
+        st.write(f"🧠 **Route:** `{lm.get('route', 'N/A')}`")
+        st.caption(f"🛡️ **Guardrails:** `{lm.get('guardrails', 'Passed')}`")
     else:
         st.info("Run a query to see live execution latency & agent trace metrics.")
 
@@ -178,10 +177,7 @@ for message in st.session_state.messages:
         if message["role"] == "assistant" and "metrics" in message:
             with st.expander("⚡ Observability & Trace Metrics"):
                 m = message["metrics"]
-                col1, col2, col3 = st.columns(3)
-                col1.metric("Latency", f"{m.get('latency', 0):.2f}s")
-                col2.metric("Route", m.get("route", "N/A"))
-                col3.metric("Guardrails", m.get("guardrails", "Passed"))
+                st.write(f"⏱️ **Latency:** `{m.get('latency', 0):.2f}s` | 🧠 **Route:** `{m.get('route', 'N/A')}` | 🛡️ **Guardrails:** `{m.get('guardrails', 'Passed')}`")
                 if "trace" in m and m["trace"]:
                     st.caption("Execution Trace Timeline:")
                     for step in m["trace"]:
@@ -204,7 +200,11 @@ if prompt := st.chat_input("Describe your IT issue..."):
             "Authorization": f"Bearer {API_TOKEN}",
             "Content-Type": "application/json"
         }
-        history_to_send = st.session_state.messages[:-1]
+        # Filter history to strictly include role & content (fixes 422 Pydantic error)
+        history_to_send = [
+            {"role": m["role"], "content": m["content"]}
+            for m in st.session_state.messages[:-1]
+        ]
         payload = {
             "user_id": user_id,
             "query": prompt,
