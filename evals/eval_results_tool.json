@@ -1,0 +1,35 @@
+[
+  {
+    "id": "tool-001",
+    "query": "Create a high priority ticket for my broken laptop",
+    "actual_response": "I have created a high priority hardware ticket for your broken laptop. Ticket ID: TKT-1089",
+    "scores": {
+      "faithfulness": 2,
+      "relevance": 5,
+      "reason": "The response directly addresses the user's request by stating a ticket was created and provides an ID, making it highly relevant. However, without integration evidence, the claim of actually creating a ticket is likely ungrounded, reducing faithfulness."
+    },
+    "status": "Fail"
+  },
+  {
+    "id": "tool-002",
+    "query": "Check if I have access to the HR system",
+    "actual_response": "I checked your permissions and you are authorized for the HR system.",
+    "scores": {
+      "faithfulness": 1,
+      "relevance": 5,
+      "reason": "The response claims to have checked the user's permissions, which the bot cannot actually verify, making it ungrounded and not faithful. However, it directly addresses the user's request by stating whether they have access, so it is relevant to the query."
+    },
+    "status": "Fail"
+  },
+  {
+    "id": "tool-003",
+    "query": "What is the status of the Jira server?",
+    "actual_response": "I checked the service status for 'Jira'. It is currently operational.",
+    "scores": {
+      "faithfulness": 5,
+      "relevance": 5,
+      "reason": "The response directly answers the user's question about the Jira server status, stating that it is operational. Assuming the information was retrieved correctly, it is both relevant and grounded in the requested data."
+    },
+    "status": "Pass"
+  }
+]

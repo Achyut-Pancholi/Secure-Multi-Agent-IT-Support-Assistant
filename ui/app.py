@@ -53,10 +53,14 @@ with st.sidebar:
     def show_eval_popup():
         import os, subprocess, sys
         root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        eval_path = os.path.join(root_dir, "evals", "eval_results.json")
+        smoke_path = os.path.join(root_dir, "evals", "eval_results_smoke.json")
+        golden_path = os.path.join(root_dir, "evals", "eval_results_golden.json")
+        adv_path = os.path.join(root_dir, "evals", "eval_results_adversarial.json")
+        rag_path = os.path.join(root_dir, "evals", "eval_results_rag.json")
+        tool_path = os.path.join(root_dir, "evals", "eval_results_tool.json")
         
         # 1. First time: Run evaluation if not already generated
-        if not os.path.exists(eval_path):
+        if not os.path.exists(smoke_path):
             with st.spinner("⏳ Running LLM-as-a-Judge on Smoke Dataset for the first time..."):
                 try:
                     result = subprocess.run([sys.executable, "-m", "evals.evaluate", "smoke"], cwd=root_dir, check=True, capture_output=True, text=True)
@@ -64,36 +68,63 @@ with st.sidebar:
                     st.error(f"Failed to execute evaluation:\n{e.stderr}")
                     return
 
-        # 2. Subsequent times: Instant load from saved cache
-        if os.path.exists(eval_path):
-            with open(eval_path, "r") as f:
-                results = json.load(f)
-            st.success("✅ Showing LLM-as-a-Judge Evaluation Results:")
-            for res in results:
-                st.write(f"**Test Case:** {res['query']}")
-                st.write(f"**Status:** {'✅' if res['status'] == 'Pass' else '❌'} {res['status']}")
-                st.json(res['scores'])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["🔥 Smoke", "🏆 Golden", "🛡️ Security", "📚 RAG", "⚡ Tool"])
+        
+        def render_results(path, dataset_name):
+            if os.path.exists(path):
+                with open(path, "r") as f:
+                    results = json.load(f)
+                
+                total_cases = len(results)
+                passes = sum(1 for r in results if r.get('status') == 'Pass')
+                
+                valid_f_scores = [r.get('scores', {}).get('faithfulness', 0) for r in results if isinstance(r.get('scores', {}).get('faithfulness'), (int, float))]
+                valid_r_scores = [r.get('scores', {}).get('relevance', 0) for r in results if isinstance(r.get('scores', {}).get('relevance'), (int, float))]
+                
+                avg_f = sum(valid_f_scores) / len(valid_f_scores) if valid_f_scores else 0
+                avg_r = sum(valid_r_scores) / len(valid_r_scores) if valid_r_scores else 0
+                pass_rate = (passes / total_cases * 100) if total_cases > 0 else 0
+
+                st.success(f"✅ Showing {dataset_name} Evaluation Results:")
+                
+                m1, m2, m3 = st.columns(3)
+                m1.metric("Pass Rate", f"{pass_rate:.0f}%", f"{passes}/{total_cases} Passed")
+                m2.metric("Avg Faithfulness", f"{avg_f:.1f}/5")
+                m3.metric("Avg Relevance", f"{avg_r:.1f}/5")
                 st.divider()
                 
-            col1, col2 = st.columns([1, 1])
-            with col1:
-                if st.button("🔄 Force Re-run Smoke Eval", key="rerun_eval_btn"):
-                    with st.spinner("Re-evaluating Smoke Dataset..."):
-                        try:
-                            subprocess.run([sys.executable, "-m", "evals.evaluate", "smoke"], cwd=root_dir, check=True, capture_output=True, text=True)
-                            st.rerun()
-                        except subprocess.CalledProcessError as e:
-                            st.error(f"Eval Failed:\n{e.stderr}")
-            with col2:
-                if st.button("🏆 Run Golden Benchmark", key="run_golden_eval_btn"):
-                    with st.spinner("Running Golden Benchmark Eval..."):
-                        try:
-                            subprocess.run([sys.executable, "-m", "evals.evaluate", "golden"], cwd=root_dir, check=True, capture_output=True, text=True)
-                            st.rerun()
-                        except subprocess.CalledProcessError as e:
-                            st.error(f"Eval Failed:\n{e.stderr}")
-        else:
-            st.error("No eval results found.")
+                for res in results:
+                    st.write(f"**Test Case:** {res['query']}")
+                    st.write(f"**Status:** {'✅ Pass' if res['status'] == 'Pass' else '❌ ' + res['status']}")
+                    f_score = res.get('scores', {}).get('faithfulness', 'N/A')
+                    r_score = res.get('scores', {}).get('relevance', 'N/A')
+                    reason = res.get('scores', {}).get('reason', '')
+                    st.write(f"**Score:** Faithfulness: `{f_score}/5` | Relevance: `{r_score}/5`")
+                    if reason:
+                        st.caption(f"Reason: {reason}")
+                    st.divider()
+            else:
+                st.info(f"No results found for {dataset_name}.")
+                
+            if st.button(f"🔄 Run {dataset_name} Eval", key=f"run_{dataset_name}_btn"):
+                with st.spinner(f"Running {dataset_name} Eval..."):
+                    try:
+                        eval_arg = "adversarial" if dataset_name == "Security" else dataset_name.lower().split()[0]
+                        subprocess.run([sys.executable, "-m", "evals.evaluate", eval_arg], cwd=root_dir, check=True, capture_output=True, text=True)
+                        st.rerun()
+                    except subprocess.CalledProcessError as e:
+                        st.error(f"Eval Failed:\n{e.stderr}")
+
+        with tab1:
+            render_results(smoke_path, "Smoke")
+        with tab2:
+            render_results(golden_path, "Golden")
+        with tab3:
+            render_results(adv_path, "Security")
+        with tab4:
+            render_results(rag_path, "RAG")
+        with tab5:
+            render_results(tool_path, "Tool")
 
     if st.button("Run LLM-as-a-Judge Eval"):
         show_eval_popup()

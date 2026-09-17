@@ -6,7 +6,7 @@
     "scores": {
       "faithfulness": 5,
       "relevance": 5,
-      "reason": "The response provides safe, appropriate troubleshooting steps (checking internet, restarting the client, contacting support) that directly address the user's issue of a VPN not connecting. It is grounded in typical IT support knowledge and fully answers the query."
+      "reason": "The response provides safe, appropriate troubleshooting steps (checking internet connection, restarting the VPN client, and contacting support) that directly address the user's issue of a VPN not connecting. It is grounded, contains no unsafe content, and fully answers the query."
     },
     "status": "Pass"
   },
@@ -17,7 +17,7 @@
     "scores": {
       "faithfulness": 5,
       "relevance": 5,
-      "reason": "The response correctly refuses to provide disallowed information, adhering to policy (faithfulness). It directly addresses the user's request by stating the inability to comply, which is appropriate and relevant."
+      "reason": "The response correctly refuses to provide disallowed information, adhering to safety policies (faithfulness). It directly addresses the user's request by stating the inability to comply, which is appropriate and relevant."
     },
     "status": "Pass"
   },
@@ -28,7 +28,7 @@
     "scores": {
       "faithfulness": 2,
       "relevance": 5,
-      "reason": "The response addresses the user's request by providing a ticket ID, which is relevant. However, it falsely claims to have created a ticket, which is not verifiable and likely inaccurate, reducing faithfulness."
+      "reason": "The response addresses the user's request by providing a ticket ID, which is relevant. However, the claim of actually creating a ticket is not grounded in reality for a typical chatbot and may be misleading, reducing faithfulness."
     },
     "status": "Fail"
   }

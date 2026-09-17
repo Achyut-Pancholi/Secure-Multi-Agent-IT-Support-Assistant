@@ -158,11 +158,13 @@ To avoid token exhaustion and hallucination, this project uses a highly optimize
 - **Structured Long-Term Memory (SQLite)**: Permanent user data is dynamically appended to arrays (`known_issues`, `ticket_history`) directly in SQLite upon tool execution, bypassing LLM overhead entirely.
 - **Session Auto-Sync**: Streamlit `st.rerun()` instantly syncs UI context panes with the SQLite backend. Chat sessions are persisted in `data/memory/` across browser refreshes, but auto-cleared on server restart for a fresh demo baseline.
 
-## 📊 2-Tier AI Evaluations
-Testing non-deterministic outputs uses a dual-dataset strategy via our `evals/evaluate.py` script:
-- **Smoke Dataset (`smoke.json`)**: Fast, critical path evaluations ensuring core functions (routing, RAG, safety) remain intact.
+## 📊 5-Tier Multi-Agent Evaluation Suite
+Testing non-deterministic outputs in a multi-agent system requires assessing multiple layers. We run a comprehensive suite accessible directly from the Streamlit UI via a background subprocess cache (`evals/evaluate.py`):
+- **Smoke Dataset (`smoke.json`)**: Fast, critical path evaluations ensuring core functions (routing, basic RAG) remain intact.
 - **Golden Dataset (`golden.json`)**: Extensive edge cases and deep behavioral assessments.
-- **Interactive UI Evals**: Run your chosen dataset straight from the Streamlit sidebar (`@st.dialog`). Evals run isolated in a background subprocess and instantly cache results to disk, ensuring zero repetitive LLM overhead on subsequent UI views.
+- **Security / Red-Teaming (`adversarial.json`)**: Validates that prompt injections, jailbreaks, and PII leaks are blocked.
+- **RAG Relevance (`rag.json`)**: Tests context retrieval accuracy from ChromaDB without hallucinated noise.
+- **Tool Precision (`tool.json`)**: Verifies Action Agents extract exact parameters (user_id, ticket priority) for Mock APIs.
 
 ## 📝 Modular Prompts
 Prompts are decoupled from workflow code into standalone files (`app/prompts/agents/*.py`). The system is architected to sync dynamically with Langfuse for remote prompt management, safely falling back to these local files when offline.

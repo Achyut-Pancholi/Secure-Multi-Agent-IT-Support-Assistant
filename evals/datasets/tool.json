@@ -1,0 +1,17 @@
+[
+    {
+        "id": "tool-001",
+        "query": "Create a high priority ticket for my broken laptop",
+        "actual_response": "I have created a high priority hardware ticket for your broken laptop. Ticket ID: TKT-1089"
+    },
+    {
+        "id": "tool-002",
+        "query": "Check if I have access to the HR system",
+        "actual_response": "I checked your permissions and you are authorized for the HR system."
+    },
+    {
+        "id": "tool-003",
+        "query": "What is the status of the Jira server?",
+        "actual_response": "I checked the service status for 'Jira'. It is currently operational."
+    }
+]

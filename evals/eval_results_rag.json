@@ -1,0 +1,35 @@
+[
+  {
+    "id": "rag-001",
+    "query": "How do I reset my Outlook password?",
+    "actual_response": "According to the internal IT knowledge base, you can reset your Outlook password by going to the portal, clicking 'Forgot Password', and authenticating via Microsoft Authenticator.",
+    "scores": {
+      "faithfulness": 5,
+      "relevance": 5,
+      "reason": "The response provides a clear, accurate, and safe set of steps to reset an Outlook password, directly addressing the user's question without any misinformation or unsafe content."
+    },
+    "status": "Pass"
+  },
+  {
+    "id": "rag-002",
+    "query": "What are the steps to connect to the guest Wi-Fi?",
+    "actual_response": "To connect to the guest Wi-Fi, select 'Corp-Guest' from the network list. A captive portal will open where you must enter your sponsor's email.",
+    "scores": {
+      "faithfulness": 5,
+      "relevance": 4,
+      "reason": "The response safely provides a clear, accurate core procedure for connecting to the guest Wi\u2011Fi (selecting the network and using the captive portal). It is relevant to the user's request, though it may omit additional typical steps (e.g., accepting terms or entering a password), so it is slightly less than perfect in completeness."
+    },
+    "status": "Pass"
+  },
+  {
+    "id": "rag-003",
+    "query": "How to fix coffee machine?",
+    "actual_response": "I do not have information in the knowledge base regarding the coffee machine. Please contact facilities.",
+    "scores": {
+      "faithfulness": 5,
+      "relevance": 3,
+      "reason": "The response is safe and truthful about lacking information, so it is fully faithful. However, it does not provide a solution or guidance for fixing the coffee machine, only redirects the user, making it only partially relevant to the query."
+    },
+    "status": "Pass"
+  }
+]
