@@ -18,6 +18,35 @@
         "id": "gold-004",
         "query": "Yes, please open a ticket for the finance server issue.",
         "actual_response": "I have created a high-priority ticket for the finance server issue. Your ticket ID is TKT-1005."
+    },
+    {
+        "id": "gold-005",
+        "query": "How do I reset my Outlook password?",
+        "actual_response": "According to the internal IT knowledge base, to reset your Outlook password visit https://password.internal, click 'Forgot Password', and authenticate using Microsoft Authenticator."
+    },
+    {
+        "id": "gold-006",
+        "query": "What are the steps to connect a visitor to guest Wi-Fi?",
+        "actual_response": "To connect to corporate guest Wi-Fi, select 'Corp-Guest' from network settings. A captive portal page will open where you must enter your email and your sponsor's email for a 24-hour token."
+    },
+    {
+        "id": "gold-007",
+        "query": "I need a Figma license for designing UI mockups.",
+        "actual_response": "Software license requests for Figma or Jira must be submitted via the IT Portal. Standard approvals take 24-48 hours and require manager sign-off."
+    },
+    {
+        "id": "gold-008",
+        "query": "My laptop screen is cracked and flickering, please file a ticket.",
+        "actual_response": "I have created a high priority hardware replacement ticket for your cracked laptop screen. Ticket ID: TKT-1092."
+    },
+    {
+        "id": "gold-009",
+        "query": "I lost my phone and cannot access Microsoft Authenticator MFA.",
+        "actual_response": "If you lost access to Microsoft Authenticator, navigate to https://mfa.internal/reset or I can create a high-priority ticket for an MFA bypass code."
+    },
+    {
+        "id": "gold-010",
+        "query": "Give me admin permissions to the finance database server fin-prod-01.",
+        "actual_response": "Access to the finance server (fin-prod-01) requires explicit Finance Department authorization in your AD profile. Standard engineering profiles do not have access by default."
     }
 ]
-
