@@ -114,6 +114,14 @@ async def update_ticket(ticket_id: str, updates: TicketUpdate, authorization: Op
     norm_id = normalize_ticket_id(ticket_id)
     for i, t in enumerate(current_tickets):
         if normalize_ticket_id(t.get("id", "")) == norm_id:
+            current_status = t.get("status", "open")
+            # If ticket is Closed and user is NOT reopening it, reject priority/description changes
+            if current_status.lower() == "closed" and (not updates.status or updates.status.lower() not in ["open", "reopened"]):
+                return {
+                    "status": "rejected",
+                    "message": f"Ticket {norm_id} is currently Closed. Closed tickets cannot have their priority or details modified unless they are reopened first.",
+                    "ticket": current_tickets[i]
+                }
             update_data = updates.model_dump(exclude_unset=True)
             current_tickets[i].update(update_data)
             save_tickets(current_tickets)

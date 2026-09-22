@@ -12,6 +12,30 @@ from app.observability.logging import get_logger
 
 logger = get_logger(__name__)
 
+from typing import Optional
+from pydantic import BaseModel, Field
+
+# Define explicit schemas for all tools
+class CheckUserAccessInput(BaseModel):
+    user_id: str = Field(description="The unique user ID to check permissions for, e.g. 'user123' or 'user456'")
+
+class CheckServiceStatusInput(BaseModel):
+    service_name: str = Field(description="The IT service name to inspect, e.g. 'vpn', 'finance_db'")
+
+class CreateTicketInput(BaseModel):
+    user_id: str = Field(description="The user ID requesting the ticket, e.g. 'user123'")
+    description: str = Field(description="Detailed summary of the IT issue")
+    category: str = Field(description="Ticket category, e.g. 'Hardware', 'Network', 'Software'")
+    priority: str = Field(description="Ticket priority level: 'Low', 'Medium', or 'High'")
+
+class UpdateTicketInput(BaseModel):
+    user_id: str = Field(description="The user ID requesting the update")
+    ticket_id: str = Field(description="The ticket identifier to update, e.g. 'TKT-1000' or '1000'")
+    description: Optional[str] = Field(default=None, description="Updated issue description (optional)")
+    category: Optional[str] = Field(default=None, description="Updated category e.g. 'Hardware', 'Network', 'Software' (optional)")
+    priority: Optional[str] = Field(default=None, description="Updated priority e.g. 'Low', 'Medium', 'High' (optional)")
+    status: Optional[str] = Field(default=None, description="Updated status e.g. 'open', 'in_progress', 'Closed', 'reopened' (optional)")
+
 # Wrap tools to enforce authorization
 def authorized_check_user_access(user_id: str) -> str:
     authorize_tool_call("action_agent", "check_user_access")
@@ -30,7 +54,7 @@ def authorized_create_support_ticket(user_id: str, description: str, category: s
         "priority": priority
     })
 
-def authorized_update_support_ticket(user_id: str, ticket_id: str, description: str = None, category: str = None, priority: str = None, status: str = None) -> str:
+def authorized_update_support_ticket(user_id: str, ticket_id: str, description: Optional[str] = None, category: Optional[str] = None, priority: Optional[str] = None, status: Optional[str] = None) -> str:
     authorize_tool_call("action_agent", "update_support_ticket")
     return update_support_ticket.invoke({
         "user_id": user_id,
@@ -45,22 +69,26 @@ auth_tools = [
     StructuredTool.from_function(
         func=authorized_check_user_access,
         name="check_user_access",
-        description="Check the current access permissions and roles for a specific user."
+        description="Check the current access permissions and roles for a specific user.",
+        args_schema=CheckUserAccessInput
     ),
     StructuredTool.from_function(
         func=authorized_check_service_status,
         name="check_service_status",
-        description="Check the current operational status of an internal IT service (e.g., 'vpn', 'finance_db')."
+        description="Check the current operational status of an internal IT service (e.g., 'vpn', 'finance_db').",
+        args_schema=CheckServiceStatusInput
     ),
     StructuredTool.from_function(
         func=authorized_create_support_ticket,
         name="create_support_ticket",
-        description="Create a new support ticket in the internal IT system."
+        description="Create a new support ticket in the internal IT system.",
+        args_schema=CreateTicketInput
     ),
     StructuredTool.from_function(
         func=authorized_update_support_ticket,
         name="update_support_ticket",
-        description="Update an existing support ticket in the internal IT system. Can change description, priority, category, or status."
+        description="Update an existing support ticket in the internal IT system. Can change description, priority, category, or status.",
+        args_schema=UpdateTicketInput
     )
 ]
 

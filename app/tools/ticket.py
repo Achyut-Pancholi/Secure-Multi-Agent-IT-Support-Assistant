@@ -65,6 +65,10 @@ def update_support_ticket(user_id: str, ticket_id: str, description: str = None,
         
         data = client.update_ticket(cleaned_id, updates)
         
+        # If the update was rejected by business rules (e.g. ticket is closed), return immediately
+        if data.get("status") == "rejected":
+            return json.dumps(data, indent=2)
+
         # --- CODE BASED STATE EXTRACTION (0 LLM Cost) ---
         from app.memory.long_term import get_user_memory, save_user_memory
         mem = get_user_memory(user_id)
