@@ -49,7 +49,13 @@ def update_support_ticket(user_id: str, ticket_id: str, description: str = None,
     Update an existing support ticket in the internal IT system.
     Use this when you need to escalate a priority, change the status, or append/update information on an existing ticket.
     """
-    logger.info(f"Executing update_support_ticket for ticket: {ticket_id}")
+    cleaned_id = ticket_id.replace("‑", "-").replace(" ", "").upper().strip()
+    if cleaned_id.isdigit():
+        cleaned_id = f"TKT-{cleaned_id}"
+    elif not cleaned_id.startswith("TKT-") and cleaned_id.startswith("TKT"):
+        cleaned_id = f"TKT-{cleaned_id[3:]}"
+
+    logger.info(f"Executing update_support_ticket for ticket: {cleaned_id}")
     try:
         updates = {}
         if description is not None: updates["description"] = description
@@ -57,7 +63,7 @@ def update_support_ticket(user_id: str, ticket_id: str, description: str = None,
         if priority is not None: updates["priority"] = priority
         if status is not None: updates["status"] = status
         
-        data = client.update_ticket(ticket_id, updates)
+        data = client.update_ticket(cleaned_id, updates)
         
         # --- CODE BASED STATE EXTRACTION (0 LLM Cost) ---
         from app.memory.long_term import get_user_memory, save_user_memory
@@ -65,13 +71,24 @@ def update_support_ticket(user_id: str, ticket_id: str, description: str = None,
         ticket_history = mem.get("ticket_history", [])
         
         # Update it in the memory array
+        found = False
         for t in ticket_history:
-            if t.get("ticket_id") == ticket_id:
+            if t.get("ticket_id", "").replace("‑", "-").upper() == cleaned_id:
                 if description is not None: t["issue"] = description
                 if category is not None: t["category"] = category
                 if priority is not None: t["priority"] = priority
                 if status is not None: t["status"] = status
+                found = True
                 
+        if not found:
+            ticket_history.append({
+                "ticket_id": cleaned_id,
+                "issue": description or "Support issue",
+                "category": category or "General",
+                "priority": priority or "Medium",
+                "status": status or "open"
+            })
+
         mem["ticket_history"] = ticket_history
         save_user_memory(user_id, mem)
         # ------------------------------------------------

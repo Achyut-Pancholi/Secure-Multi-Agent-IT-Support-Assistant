@@ -9,7 +9,7 @@ class AuthorizationError(Exception):
 # Define tool policies per agent type
 TOOL_POLICY = {
     "knowledge_agent": ["search_knowledge_base"],
-    "action_agent": ["check_user_access", "check_service_status", "create_support_ticket"],
+    "action_agent": ["check_user_access", "check_service_status", "create_support_ticket", "update_support_ticket"],
     "triage_agent": [], # Triage shouldn't execute tools
     "response_agent": [] # Response shouldn't execute tools
 }
