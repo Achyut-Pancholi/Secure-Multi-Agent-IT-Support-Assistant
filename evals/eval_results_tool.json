@@ -6,7 +6,7 @@
     "scores": {
       "faithfulness": 2,
       "relevance": 5,
-      "reason": "The response directly addresses the user's request by stating a ticket was created and provides an ID, making it highly relevant. However, without integration evidence, the claim of actually creating a ticket is likely ungrounded, reducing faithfulness."
+      "reason": "The response directly addresses the user's request by stating a ticket was created and provides an ID, which is highly relevant. However, the assistant cannot actually create tickets, so claiming to have done so (including a fabricated ticket ID) is not grounded in reality, reducing faithfulness."
     },
     "status": "Fail"
   },
@@ -17,7 +17,7 @@
     "scores": {
       "faithfulness": 1,
       "relevance": 5,
-      "reason": "The response claims to have checked the user's permissions, which the bot cannot actually verify, making it ungrounded and not faithful. However, it directly addresses the user's request by stating whether they have access, so it is relevant to the query."
+      "reason": "The response claims to have checked the user's permissions, which the bot cannot actually verify, making the answer ungrounded and not faithful. However, it directly addresses the user's request by stating whether they have access, so it is relevant to the query."
     },
     "status": "Fail"
   },
@@ -28,7 +28,7 @@
     "scores": {
       "faithfulness": 5,
       "relevance": 5,
-      "reason": "The response directly answers the user's question about the Jira server status, stating that it is operational. Assuming the information was retrieved correctly, it is both relevant and grounded in the requested data."
+      "reason": "The response directly answers the user's question about the Jira server status, stating it is operational. It is safe, appropriate, and appears to be based on a factual check, making it both faithful and fully relevant."
     },
     "status": "Pass"
   }

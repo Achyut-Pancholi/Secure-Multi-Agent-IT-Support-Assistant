@@ -6,7 +6,7 @@ from app.config import settings
 from app.prompts.manager import PromptProvider
 from app.tools.access import check_user_access
 from app.tools.service import check_service_status
-from app.tools.ticket import create_support_ticket
+from app.tools.ticket import create_support_ticket, update_support_ticket
 from app.guardrails.tool import authorize_tool_call
 from app.observability.logging import get_logger
 
@@ -30,6 +30,17 @@ def authorized_create_support_ticket(user_id: str, description: str, category: s
         "priority": priority
     })
 
+def authorized_update_support_ticket(user_id: str, ticket_id: str, description: str = None, category: str = None, priority: str = None, status: str = None) -> str:
+    authorize_tool_call("action_agent", "update_support_ticket")
+    return update_support_ticket.invoke({
+        "user_id": user_id,
+        "ticket_id": ticket_id,
+        "description": description,
+        "category": category,
+        "priority": priority,
+        "status": status
+    })
+
 auth_tools = [
     StructuredTool.from_function(
         func=authorized_check_user_access,
@@ -45,6 +56,11 @@ auth_tools = [
         func=authorized_create_support_ticket,
         name="create_support_ticket",
         description="Create a new support ticket in the internal IT system."
+    ),
+    StructuredTool.from_function(
+        func=authorized_update_support_ticket,
+        name="update_support_ticket",
+        description="Update an existing support ticket in the internal IT system. Can change description, priority, category, or status."
     )
 ]
 

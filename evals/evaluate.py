@@ -66,10 +66,11 @@ def evaluate_responses(dataset_name="smoke"):
         
     # Save to JSON
     os.makedirs("evals", exist_ok=True)
-    with open("evals/eval_results.json", "w") as f:
+    out_path = f"evals/eval_results_{dataset_name}.json"
+    with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
         
-    print("\n[DONE] Evaluation Complete! Results saved to evals/eval_results.json")
+    print(f"\n[DONE] Evaluation Complete! Results saved to {out_path}")
     
 if __name__ == "__main__":
     dataset = sys.argv[1] if len(sys.argv) > 1 else "smoke"

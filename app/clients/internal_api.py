@@ -83,3 +83,7 @@ class InternalAPIClient:
         }
         return self._request_with_retry("POST", "/internal/tickets", json=payload)
 
+    def update_ticket(self, ticket_id: str, updates: dict) -> Dict[str, Any]:
+        """Update an existing support ticket"""
+        return self._request_with_retry("PUT", f"/internal/tickets/{ticket_id}", json=updates)
+
